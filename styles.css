@@ -1,0 +1,155 @@
+:root {
+  color-scheme: light;
+  --bg: #f5f1e8;
+  --panel: #fffdf8;
+  --grid: #ddd4c4;
+  --text: #2f2b24;
+  --muted: #756b5d;
+  --snake: #2f6b3b;
+  --snake-head: #1f4d29;
+  --food: #bb3e2b;
+  --button: #ebe2d2;
+  --button-border: #c7bba6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Georgia, "Times New Roman", serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.app {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.panel {
+  width: min(100%, 560px);
+  padding: 24px;
+  background: var(--panel);
+  border: 1px solid var(--grid);
+}
+
+.panel__header,
+.status-row,
+.controls__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.scoreboard {
+  text-align: right;
+}
+
+.scoreboard span,
+#status {
+  color: var(--muted);
+}
+
+.scoreboard strong {
+  display: block;
+  font-size: 1.5rem;
+}
+
+.status-row {
+  margin: 16px 0;
+  align-items: flex-start;
+}
+
+#status {
+  margin: 0;
+}
+
+.actions,
+.controls {
+  display: flex;
+  gap: 8px;
+}
+
+.controls {
+  margin-top: 16px;
+  flex-direction: column;
+  align-items: center;
+}
+
+button {
+  border: 1px solid var(--button-border);
+  background: var(--button);
+  color: var(--text);
+  padding: 10px 14px;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--snake-head);
+  outline-offset: 2px;
+}
+
+.board {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1px solid var(--grid);
+  background: #f8f4eb;
+}
+
+.cell {
+  border: 1px solid rgba(199, 187, 166, 0.35);
+}
+
+.cell--snake {
+  background: var(--snake);
+}
+
+.cell--head {
+  background: var(--snake-head);
+}
+
+.cell--food {
+  background: var(--food);
+}
+
+@media (max-width: 640px) {
+  .panel {
+    padding: 16px;
+  }
+
+  .panel__header,
+  .status-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .actions {
+    width: 100%;
+  }
+
+  .actions button,
+  .controls button {
+    flex: 1;
+  }
+}
