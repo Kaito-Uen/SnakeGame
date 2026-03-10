@@ -1,6 +1,6 @@
 const GRID_SIZE = 16;
 const TICK_MS = 140;
-const SWIPE_THRESHOLD = 24;
+const SWIPE_THRESHOLD = 18;
 
 const DIRECTIONS = {
   up: { x: 0, y: -1 },
@@ -201,6 +201,7 @@ function restartGame() {
   state = createInitialState();
   queuedDirection = state.direction;
   stopLoop();
+  clearTouchSession();
   draw();
 }
 
@@ -241,7 +242,7 @@ function buildCells() {
 
 function getStatusMessage() {
   if (state.status === "ready") {
-    return "Arrow keys, WASD, buttons, or swipe to start.";
+    return "Swipe or tap a direction to start.";
   }
 
   if (state.status === "paused") {
@@ -256,7 +257,7 @@ function getStatusMessage() {
     return "Board cleared. Restart to play again.";
   }
 
-  return `Moving ${queuedDirection}. Tap Pause or swipe to turn.`;
+  return `Moving ${queuedDirection}. Swipe again at any time to turn.`;
 }
 
 window.addEventListener("keydown", (event) => {
@@ -283,22 +284,49 @@ controlsElement.addEventListener("click", (event) => {
   setDirection(button.dataset.direction);
 });
 
-boardElement.addEventListener("touchstart", (event) => {
-  const touch = event.changedTouches[0];
-  touchSession = {
-    id: touch.identifier,
-    x: touch.clientX,
-    y: touch.clientY
-  };
-}, { passive: true });
-
-window.addEventListener("touchend", handleTouchFinish, { passive: false });
+boardElement.addEventListener("touchstart", handleTouchStart, { passive: true });
+window.addEventListener("touchmove", handleTouchMove, { passive: false });
+window.addEventListener("touchend", handleTouchEnd, { passive: false });
 window.addEventListener("touchcancel", clearTouchSession, { passive: true });
 
 pauseButton.addEventListener("click", togglePause);
 restartButton.addEventListener("click", restartGame);
 
-function handleTouchFinish(event) {
+function handleTouchStart(event) {
+  const touch = event.changedTouches[0];
+  touchSession = {
+    id: touch.identifier,
+    x: touch.clientX,
+    y: touch.clientY,
+    active: true
+  };
+}
+
+function handleTouchMove(event) {
+  if (!touchSession) {
+    return;
+  }
+
+  const touch = findTouch(event.touches, touchSession.id);
+  if (!touch) {
+    return;
+  }
+
+  const deltaX = touch.clientX - touchSession.x;
+  const deltaY = touch.clientY - touchSession.y;
+  const direction = swipeToDirection(deltaX, deltaY);
+
+  if (!direction) {
+    return;
+  }
+
+  event.preventDefault();
+  setDirection(direction);
+  touchSession.x = touch.clientX;
+  touchSession.y = touch.clientY;
+}
+
+function handleTouchEnd(event) {
   if (!touchSession) {
     return;
   }
