@@ -137,7 +137,7 @@ const controlsElement = document.querySelector(".controls");
 let state = createInitialState();
 let queuedDirection = state.direction;
 let timerId = null;
-let touchStartPoint = null;
+let touchSession = null;
 
 boardElement.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 1fr)`;
 draw();
@@ -285,28 +285,53 @@ controlsElement.addEventListener("click", (event) => {
 
 boardElement.addEventListener("touchstart", (event) => {
   const touch = event.changedTouches[0];
-  touchStartPoint = { x: touch.clientX, y: touch.clientY };
+  touchSession = {
+    id: touch.identifier,
+    x: touch.clientX,
+    y: touch.clientY
+  };
 }, { passive: true });
 
-boardElement.addEventListener("touchend", (event) => {
-  if (!touchStartPoint) {
+window.addEventListener("touchend", handleTouchFinish, { passive: false });
+window.addEventListener("touchcancel", clearTouchSession, { passive: true });
+
+pauseButton.addEventListener("click", togglePause);
+restartButton.addEventListener("click", restartGame);
+
+function handleTouchFinish(event) {
+  if (!touchSession) {
     return;
   }
 
-  const touch = event.changedTouches[0];
-  const deltaX = touch.clientX - touchStartPoint.x;
-  const deltaY = touch.clientY - touchStartPoint.y;
+  const touch = findTouch(event.changedTouches, touchSession.id);
+  if (!touch) {
+    return;
+  }
+
+  const deltaX = touch.clientX - touchSession.x;
+  const deltaY = touch.clientY - touchSession.y;
   const direction = swipeToDirection(deltaX, deltaY);
-  touchStartPoint = null;
+  clearTouchSession();
 
   if (direction) {
     event.preventDefault();
     setDirection(direction);
   }
-});
+}
 
-pauseButton.addEventListener("click", togglePause);
-restartButton.addEventListener("click", restartGame);
+function clearTouchSession() {
+  touchSession = null;
+}
+
+function findTouch(touchList, identifier) {
+  for (let index = 0; index < touchList.length; index += 1) {
+    if (touchList[index].identifier === identifier) {
+      return touchList[index];
+    }
+  }
+
+  return null;
+}
 
 function keyToDirection(key) {
   switch (key) {
