@@ -16,6 +16,11 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  overscroll-behavior: none;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -93,6 +98,8 @@ h1 {
   margin-top: 16px;
   flex-direction: column;
   align-items: center;
+  touch-action: manipulation;
+  user-select: none;
 }
 
 button {
@@ -115,6 +122,7 @@ button:focus-visible {
   aspect-ratio: 1;
   border: 1px solid var(--grid);
   background: #f8f4eb;
+  touch-action: none;
 }
 
 .cell {
@@ -134,7 +142,14 @@ button:focus-visible {
 }
 
 @media (max-width: 640px) {
+  .app {
+    min-height: 100dvh;
+    padding: 12px;
+    place-items: start center;
+  }
+
   .panel {
+    width: 100%;
     padding: 16px;
   }
 
@@ -144,12 +159,33 @@ button:focus-visible {
     align-items: flex-start;
   }
 
+  .scoreboard {
+    text-align: left;
+  }
+
   .actions {
     width: 100%;
   }
 
-  .actions button,
-  .controls button {
+  .actions button {
     flex: 1;
+    min-height: 48px;
+  }
+
+  .controls {
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  .controls > button,
+  .controls__row button {
+    min-width: 72px;
+    min-height: 56px;
+    padding: 12px 18px;
+  }
+
+  .controls__row {
+    width: 100%;
+    justify-content: center;
   }
 }

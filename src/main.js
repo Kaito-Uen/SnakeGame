@@ -1,5 +1,6 @@
 const GRID_SIZE = 16;
 const TICK_MS = 140;
+const SWIPE_THRESHOLD = 24;
 
 const DIRECTIONS = {
   up: { x: 0, y: -1 },
@@ -136,6 +137,7 @@ const controlsElement = document.querySelector(".controls");
 let state = createInitialState();
 let queuedDirection = state.direction;
 let timerId = null;
+let touchStartPoint = null;
 
 boardElement.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 1fr)`;
 draw();
@@ -239,7 +241,7 @@ function buildCells() {
 
 function getStatusMessage() {
   if (state.status === "ready") {
-    return "Press any arrow key or WASD to start.";
+    return "Arrow keys, WASD, buttons, or swipe to start.";
   }
 
   if (state.status === "paused") {
@@ -254,7 +256,7 @@ function getStatusMessage() {
     return "Board cleared. Restart to play again.";
   }
 
-  return `Moving ${queuedDirection}. Press Space to pause.`;
+  return `Moving ${queuedDirection}. Tap Pause or swipe to turn.`;
 }
 
 window.addEventListener("keydown", (event) => {
@@ -281,6 +283,28 @@ controlsElement.addEventListener("click", (event) => {
   setDirection(button.dataset.direction);
 });
 
+boardElement.addEventListener("touchstart", (event) => {
+  const touch = event.changedTouches[0];
+  touchStartPoint = { x: touch.clientX, y: touch.clientY };
+}, { passive: true });
+
+boardElement.addEventListener("touchend", (event) => {
+  if (!touchStartPoint) {
+    return;
+  }
+
+  const touch = event.changedTouches[0];
+  const deltaX = touch.clientX - touchStartPoint.x;
+  const deltaY = touch.clientY - touchStartPoint.y;
+  const direction = swipeToDirection(deltaX, deltaY);
+  touchStartPoint = null;
+
+  if (direction) {
+    event.preventDefault();
+    setDirection(direction);
+  }
+});
+
 pauseButton.addEventListener("click", togglePause);
 restartButton.addEventListener("click", restartGame);
 
@@ -305,4 +329,16 @@ function keyToDirection(key) {
     default:
       return null;
   }
+}
+
+function swipeToDirection(deltaX, deltaY) {
+  if (Math.abs(deltaX) < SWIPE_THRESHOLD && Math.abs(deltaY) < SWIPE_THRESHOLD) {
+    return null;
+  }
+
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    return deltaX > 0 ? "right" : "left";
+  }
+
+  return deltaY > 0 ? "down" : "up";
 }
